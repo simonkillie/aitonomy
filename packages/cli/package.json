@@ -1,6 +1,6 @@
 {
   "name": "agentry-cli",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Measure how autonomously you work — scored from real agent session data",
   "keywords": [
     "agentry",
