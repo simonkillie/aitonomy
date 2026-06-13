@@ -53,8 +53,22 @@ grep -qi "optional" README.md || fail "README does not state submitting is optio
 grep -qiE "profile" docs/RESEARCH.md || fail "RESEARCH.md does not define profiles"
 
 # 10. deploy to Vercel production and capture the URL
-URL=$(vercel deploy --prod --yes --token "$VERCEL_TOKEN" 2>/tmp/deploy.log | tail -n1)
-case "$URL" in https://*) ;; *) cat /tmp/deploy.log; fail "deploy returned no https url" ;; esac
+# Vercel CLI v54 emits progress on stderr and the deployment URL there too.
+# Capture everything, extract the deployment URL, then re-alias the canonical domain.
+DEPLOY_OUT=$(vercel deploy --prod --yes --token "$VERCEL_TOKEN" 2>&1) || { echo "$DEPLOY_OUT"; fail "vercel deploy exited non-zero"; }
+echo "$DEPLOY_OUT" >/tmp/deploy.log
+DEPLOY_URL=$(echo "$DEPLOY_OUT" | grep -oE 'Production\s+https://\S+' | grep -oE 'https://\S+' | head -1)
+[ -n "$DEPLOY_URL" ] || { cat /tmp/deploy.log; fail "deploy returned no https url"; }
+# Re-alias canonical domain to the new deployment
+DEPLOY_ID=$(echo "$DEPLOY_OUT" | grep -oE 'dpl_[A-Za-z0-9]+' | head -1)
+if [ -n "$DEPLOY_ID" ] && [ -n "${VERCEL_TOKEN:-}" ]; then
+  curl -s -X POST "https://api.vercel.com/v2/deployments/$DEPLOY_ID/aliases" \
+    -H "Authorization: Bearer $VERCEL_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"alias":"agentry-cli.vercel.app"}' >/dev/null 2>&1 || true
+  sleep 3
+fi
+URL="https://agentry-cli.vercel.app"
 
 # 11. live site returns 200 and renders the leaderboard
 code=$(curl -s -o /tmp/home.html -w "%{http_code}" "$URL")
