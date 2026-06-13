@@ -1,0 +1,18 @@
+{
+  "name": "agentry",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "typecheck": "npm run -ws --if-present typecheck",
+    "lint": "npm run -ws --if-present lint",
+    "test": "npm test --workspaces",
+    "build": "npm run -ws --if-present build"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
