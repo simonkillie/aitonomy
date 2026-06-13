@@ -32,11 +32,40 @@ export function normalizeRunLength(meanStreakMinutes: number): number {
   return Math.min(100, (meanStreakMinutes / 1.5));
 }
 
+const IDLE_GAP_MS = 30 * 60 * 1000; // 30-minute idle gap separates activity windows
+
+function getActivityWindows(session: ParsedSession): Array<{ start: number; end: number }> {
+  const times = session.events
+    .map(e => new Date(e.timestamp).getTime())
+    .filter(t => !isNaN(t))
+    .sort((a, b) => a - b);
+
+  if (!times.length) return [];
+
+  const windows: Array<{ start: number; end: number }> = [];
+  let winStart = times[0];
+  let winEnd = times[0];
+
+  for (let i = 1; i < times.length; i++) {
+    if (times[i] - winEnd > IDLE_GAP_MS) {
+      windows.push({ start: winStart, end: winEnd });
+      winStart = times[i];
+    }
+    winEnd = times[i];
+  }
+  windows.push({ start: winStart, end: winEnd });
+  return windows;
+}
+
 function computePeakConcurrency(sessions: ParsedSession[]): number {
+  // Use activity windows rather than full session spans — a session open for weeks
+  // but idle shouldn't count as concurrent with sessions active today.
   const events: { time: number; delta: number }[] = [];
   for (const s of sessions) {
-    events.push({ time: s.startTime.getTime(), delta: 1 });
-    events.push({ time: s.endTime.getTime(), delta: -1 });
+    for (const w of getActivityWindows(s)) {
+      events.push({ time: w.start, delta: 1 });
+      events.push({ time: w.end, delta: -1 });
+    }
   }
   events.sort((a, b) => a.time - b.time || b.delta - a.delta);
 
