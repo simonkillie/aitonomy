@@ -3,33 +3,16 @@ import { getLeaderboard, Entry } from '../lib/db';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const PROFILE_EMOJI: Record<string, string> = {
-  'Fleet Orchestrator': '🚀',
-  'Hands-Off Architect': '🏛️',
-  'Autonomous Operator': '⚙️',
-  'Copilot Collaborator': '🤝',
-  'Hand-Coder': '⌨️',
+const PROFILE_COLOR: Record<string, string> = {
+  'Fleet Orchestrator': '#a78bfa',
+  'Hands-Off Architect': '#60a5fa',
+  'Autonomous Operator': '#34d399',
+  'Copilot Collaborator': '#fbbf24',
+  'Hand-Coder': '#9ca3af',
 };
 
-function getEmoji(profile: string): string {
-  return PROFILE_EMOJI[profile] ?? '📊';
-}
-
-function ScoreBar({ score }: { score: number }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <div
-        style={{
-          width: `${Math.max(4, score)}%`,
-          maxWidth: '120px',
-          height: '8px',
-          background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
-          borderRadius: '4px',
-        }}
-      />
-      <span style={{ fontWeight: 700, fontSize: '1.1em' }}>{Number(score).toFixed(1)}</span>
-    </div>
-  );
+function profileColor(profile: string): string {
+  return PROFILE_COLOR[profile] ?? '#6b7280';
 }
 
 export default async function Home() {
@@ -43,79 +26,120 @@ export default async function Home() {
   }
 
   return (
-    <main style={{ maxWidth: '860px', margin: '0 auto', padding: '40px 24px' }}>
-      <header style={{ marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '8px' }}>
-          agentry <span style={{ color: '#6b7280', fontWeight: 400, fontSize: '1rem' }}>autonomy leaderboard</span>
-        </h1>
-        <p style={{ color: '#9ca3af', maxWidth: '600px' }}>
-          Scores derived from real agent session data — parallelism, delegation depth, hands-off ratio, and run length.
-          Submitting is <strong style={{ color: '#ededed' }}>optional</strong>.{' '}
-          <a href="https://github.com/simonkillie/aitonomy">View source →</a>
-        </p>
-      </header>
+    <>
+      <style>{`
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0d0d0d; color: #e5e5e5; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; }
+        a { color: inherit; text-decoration: none; }
+        a:hover { color: #fff; }
+        .container { max-width: 720px; margin: 0 auto; padding: 64px 24px; }
+        .header { margin-bottom: 48px; }
+        .wordmark { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7280; margin-bottom: 24px; }
+        .title { font-size: 28px; font-weight: 700; color: #f5f5f5; margin-bottom: 10px; letter-spacing: -0.02em; }
+        .subtitle { color: #6b7280; font-size: 13px; max-width: 480px; }
+        .subtitle strong { color: #9ca3af; font-weight: 500; }
+        .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #4b5563; margin-bottom: 16px; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table thead tr { border-bottom: 1px solid #1f1f1f; }
+        .table th { text-align: left; padding: 0 12px 12px; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #4b5563; }
+        .table th:first-child { width: 36px; }
+        .table th:nth-child(3) { width: 120px; }
+        .table tbody tr { border-bottom: 1px solid #161616; }
+        .table tbody tr:hover { background: #111; }
+        .table td { padding: 14px 12px; vertical-align: middle; }
+        .rank { color: #374151; font-size: 12px; font-variant-numeric: tabular-nums; }
+        .handle { font-weight: 500; color: #d1d5db; }
+        .score-cell { display: flex; align-items: center; gap: 10px; }
+        .score-bar-track { width: 64px; height: 3px; background: #1f1f1f; border-radius: 2px; flex-shrink: 0; }
+        .score-bar-fill { height: 3px; border-radius: 2px; }
+        .score-num { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: #e5e5e5; }
+        .profile-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: #9ca3af; }
+        .profile-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .footer { margin-top: 64px; border-top: 1px solid #161616; padding-top: 24px; display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+        .footer-note { font-size: 12px; color: #374151; max-width: 400px; }
+        .footer-links { display: flex; gap: 16px; font-size: 12px; color: #4b5563; white-space: nowrap; flex-shrink: 0; }
+        .footer-links a:hover { color: #9ca3af; }
+        .error { padding: 16px; border: 1px solid #1f1f1f; border-radius: 6px; color: #f87171; font-size: 12px; }
+        .empty { text-align: center; padding: 48px 12px; color: #374151; }
+        .empty code { color: #4b5563; }
+      `}</style>
+      <div className="container">
+        <header className="header">
+          <div className="wordmark">agentry</div>
+          <h1 className="title">Autonomy Leaderboard</h1>
+          <p className="subtitle">
+            Scores derived from agent session data — never self-reported.
+            Submitting is <strong>optional</strong>; the CLI defaults to dry-run.
+          </p>
+        </header>
 
-      {error ? (
-        <div style={{ padding: '20px', background: '#1f1f1f', borderRadius: '8px', color: '#f87171' }}>
-          Error loading leaderboard: {error}
-        </div>
-      ) : (
-        <section>
-          <h2 style={{ fontSize: '1.1rem', color: '#9ca3af', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            Leaderboard
-          </h2>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ textAlign: 'left', borderBottom: '1px solid #374151', color: '#6b7280', fontSize: '0.85rem' }}>
-                <th style={{ padding: '8px 12px', width: '48px' }}>#</th>
-                <th style={{ padding: '8px 12px' }}>Handle</th>
-                <th style={{ padding: '8px 12px', width: '220px' }}>Score</th>
-                <th style={{ padding: '8px 12px' }}>Profile</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((entry: Entry, idx: number) => (
-                <tr
-                  key={entry.id}
-                  style={{
-                    borderBottom: '1px solid #1f2937',
-                    transition: 'background 0.1s',
-                  }}
-                >
-                  <td style={{ padding: '12px', color: '#6b7280', fontFamily: 'monospace' }}>
-                    {idx + 1}
-                  </td>
-                  <td style={{ padding: '12px', fontWeight: 600 }}>{entry.handle}</td>
-                  <td style={{ padding: '12px' }}>
-                    <ScoreBar score={Number(entry.score)} />
-                  </td>
-                  <td style={{ padding: '12px', color: '#d1d5db' }}>
-                    {getEmoji(entry.profile)} {entry.profile}
-                  </td>
-                </tr>
-              ))}
-              {entries.length === 0 && (
+        {error ? (
+          <div className="error">{error}</div>
+        ) : (
+          <section>
+            <div className="section-label">Rankings</div>
+            <table className="table">
+              <thead>
                 <tr>
-                  <td colSpan={4} style={{ padding: '32px 12px', textAlign: 'center', color: '#6b7280' }}>
-                    No entries yet. Run <code>agentry scan --submit</code> to be the first!
-                  </td>
+                  <th>#</th>
+                  <th>Handle</th>
+                  <th>Score</th>
+                  <th>Profile</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </section>
-      )}
+              </thead>
+              <tbody>
+                {entries.map((entry: Entry, idx: number) => {
+                  const score = Number(entry.score);
+                  const color = profileColor(entry.profile);
+                  return (
+                    <tr key={entry.id}>
+                      <td><span className="rank">{idx + 1}</span></td>
+                      <td><span className="handle">{entry.handle}</span></td>
+                      <td>
+                        <div className="score-cell">
+                          <div className="score-bar-track">
+                            <div
+                              className="score-bar-fill"
+                              style={{ width: `${score}%`, background: color }}
+                            />
+                          </div>
+                          <span className="score-num">{score.toFixed(0)}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="profile-pill">
+                          <span className="profile-dot" style={{ background: color }} />
+                          {entry.profile}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {entries.length === 0 && (
+                  <tr>
+                    <td colSpan={4}>
+                      <div className="empty">
+                        No entries yet — run <code>agentry scan --submit</code>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </section>
+        )}
 
-      <footer style={{ marginTop: '60px', color: '#4b5563', fontSize: '0.85rem', borderTop: '1px solid #1f2937', paddingTop: '24px' }}>
-        <p>
-          Privacy: agentry never reads or transmits prompt text, code, or file paths. Only numeric aggregates are submitted.
-          Submitting is optional — <code>agentry scan</code> is dry-run by default.
-        </p>
-        <p style={{ marginTop: '8px' }}>
-          <a href="https://github.com/simonkillie/aitonomy">GitHub</a> ·{' '}
-          <a href="/api/leaderboard">API</a>
-        </p>
-      </footer>
-    </main>
+        <footer className="footer">
+          <p className="footer-note">
+            Privacy: never reads or transmits prompt text, code, or file paths.
+            Only numeric aggregates are submitted.
+          </p>
+          <div className="footer-links">
+            <a href="https://github.com/simonkillie/aitonomy" target="_blank" rel="noopener">GitHub</a>
+            <a href="/api/leaderboard">API</a>
+          </div>
+        </footer>
+      </div>
+    </>
   );
 }
