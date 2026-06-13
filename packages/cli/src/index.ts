@@ -40,7 +40,7 @@ function axisInsight(metrics: Metrics): string {
 
 const program = new Command();
 
-program.name('agentry').description('Measure developer autonomy from agent session data').version('1.0.6');
+program.name('agentry').description('Measure developer autonomy from agent session data').version('1.0.7');
 
 program
   .command('scan')
@@ -146,7 +146,7 @@ program
         console.log('');
         console.log('  https://agentry-cli.vercel.app');
         console.log('');
-        console.log('  Nothing leaves your machine without --submit.');
+        console.log('  Dry run — nothing leaves your machine without --submit.');
       }
 
       console.log(sep);
