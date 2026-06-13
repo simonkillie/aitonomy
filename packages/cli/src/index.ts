@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import * as os from 'os';
 import { Command } from 'commander';
 import { scan } from './scanner';
 import { computeMetrics } from './metrics';
@@ -14,17 +15,28 @@ program
   .description('Scan agent sessions and compute autonomy score')
   .option('--submit', 'Submit score to the leaderboard (opt-in only)')
   .option('--handle <name>', 'Handle to display on the leaderboard', 'anonymous')
+  .option('--username <name>', 'OS username override (defaults to system username)')
   .option('--last-n <n>', 'Maximum number of recent sessions to include', '50')
   .option('--days <d>', 'Number of days to look back', '7')
-  .action(async (opts: { submit?: boolean; handle: string; lastN: string; days: string }) => {
+  .action(async (opts: { submit?: boolean; handle: string; username?: string; lastN: string; days: string }) => {
     try {
       const sessions = await scan({ lastN: parseInt(opts.lastN), days: parseInt(opts.days) });
       const metrics = computeMetrics(sessions);
       const profile = mapProfile(metrics.composite);
-      const payload = buildPayload({ metrics, profile, handle: opts.handle });
+
+      const claudeCount = sessions.filter(s => s.source === 'claude').length;
+      const codexCount = sessions.filter(s => s.source === 'codex').length;
+      let clientType: string;
+      if (claudeCount > 0 && codexCount > 0) clientType = 'Mixed';
+      else if (codexCount > 0) clientType = 'Codex';
+      else clientType = 'Claude Code';
+
+      const username = opts.username ?? os.userInfo().username;
+      const payload = buildPayload({ metrics, profile, handle: opts.handle, clientType, username });
 
       console.log('\n=== agentry Autonomy Report ===');
       console.log(`Sessions analysed : ${metrics.sessionCount}`);
+      console.log(`Client            : ${clientType}`);
       console.log(`Composite Score   : ${metrics.composite.toFixed(1)} / 100`);
       console.log(`Profile           : ${profile}`);
       console.log(`                    ${getProfileDescription(profile)}`);

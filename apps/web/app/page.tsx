@@ -44,6 +44,10 @@ export default async function Home() {
         .table th { text-align: left; padding: 0 12px 12px; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #4b5563; }
         .table th:first-child { width: 36px; }
         .table th:nth-child(3) { width: 120px; }
+        .client-badge { display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: 0.04em; padding: 2px 6px; border-radius: 3px; background: #1a1a1a; color: #6b7280; border: 1px solid #222; white-space: nowrap; }
+        .client-badge.claude { color: #f59e0b; border-color: #292310; background: #141008; }
+        .client-badge.codex { color: #60a5fa; border-color: #0d1929; background: #070d1a; }
+        .username-text { font-size: 11px; color: #4b5563; margin-top: 2px; }
         .table tbody tr { border-bottom: 1px solid #161616; }
         .table tbody tr:hover { background: #111; }
         .table td { padding: 14px 12px; vertical-align: middle; }
@@ -95,16 +99,24 @@ export default async function Home() {
                   <th>Handle</th>
                   <th>Score</th>
                   <th>Profile</th>
+                  <th style={{width:'90px'}}>Client</th>
                 </tr>
               </thead>
               <tbody>
                 {entries.map((entry: Entry, idx: number) => {
                   const score = Number(entry.score);
                   const color = profileColor(entry.profile);
+                  const clientLower = (entry.client_type ?? '').toLowerCase();
+                  const clientClass = clientLower.includes('claude') ? 'claude' : clientLower.includes('codex') ? 'codex' : '';
                   return (
                     <tr key={entry.id}>
                       <td><span className="rank">{idx + 1}</span></td>
-                      <td><span className="handle">{entry.handle}</span></td>
+                      <td>
+                        <span className="handle">{entry.handle}</span>
+                        {entry.username && entry.username !== entry.handle && (
+                          <div className="username-text">{entry.username}</div>
+                        )}
+                      </td>
                       <td>
                         <div className="score-cell">
                           <div className="score-bar-track">
@@ -121,6 +133,11 @@ export default async function Home() {
                           <span className="profile-dot" style={{ background: color }} />
                           {entry.profile}
                         </div>
+                      </td>
+                      <td>
+                        {entry.client_type && (
+                          <span className={`client-badge ${clientClass}`}>{entry.client_type}</span>
+                        )}
                       </td>
                     </tr>
                   );

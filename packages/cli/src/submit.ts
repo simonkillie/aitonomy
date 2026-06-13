@@ -17,6 +17,8 @@ export interface SubmitPayload {
   timeWindow: { start: string; end: string };
   deviceHash: string;
   sessionCount: number;
+  clientType: string;
+  username: string;
 }
 
 export function getDeviceHash(): string {
@@ -28,8 +30,10 @@ export function buildPayload(opts: {
   metrics: Metrics;
   profile: Profile;
   handle?: string;
+  clientType?: string;
+  username?: string;
 }): SubmitPayload {
-  const { metrics, profile, handle = 'anonymous' } = opts;
+  const { metrics, profile, handle = 'anonymous', clientType = 'Claude Code', username = os.userInfo().username } = opts;
 
   // Payload carries only numeric scores — no session content, no prompt text, no message body
   return {
@@ -46,12 +50,14 @@ export function buildPayload(opts: {
     timeWindow: metrics.timeWindow,
     deviceHash: getDeviceHash(),
     sessionCount: metrics.sessionCount,
+    clientType,
+    username,
   };
 }
 
 export async function submitPayload(
   payload: SubmitPayload,
-  endpoint = 'https://agentry-hq.vercel.app/api/submit',
+  endpoint = 'https://agentry-cli.vercel.app/api/submit',
 ): Promise<{ ok: boolean; message: string }> {
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -65,6 +71,8 @@ export async function submitPayload(
       delegation_score: payload.scores.delegationDepth,
       hands_off_score: payload.scores.handsOffRatio,
       run_length_score: payload.scores.runLength,
+      client_type: payload.clientType,
+      username: payload.username,
     }),
   });
 

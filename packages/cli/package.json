@@ -1,8 +1,16 @@
 {
   "name": "agentry-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Measure how autonomously you work — scored from real agent session data",
-  "keywords": ["agentry", "ai", "autonomy", "claude", "codex", "cli", "developer-tools"],
+  "keywords": [
+    "agentry",
+    "ai",
+    "autonomy",
+    "claude",
+    "codex",
+    "cli",
+    "developer-tools"
+  ],
   "homepage": "https://agentry.vercel.app",
   "repository": {
     "type": "git",

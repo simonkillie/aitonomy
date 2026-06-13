@@ -7,6 +7,8 @@ export interface SubmitBody {
   delegation_score?: number | null;
   hands_off_score?: number | null;
   run_length_score?: number | null;
+  client_type?: string | null;
+  username?: string | null;
 }
 
 export class ValidationError extends Error {
@@ -52,5 +54,7 @@ export function validateSubmitPayload(body: unknown): SubmitBody {
     delegation_score: obj.delegation_score != null ? normalizeScore(obj.delegation_score) : null,
     hands_off_score: obj.hands_off_score != null ? normalizeScore(obj.hands_off_score) : null,
     run_length_score: obj.run_length_score != null ? normalizeScore(obj.run_length_score) : null,
+    client_type: obj.client_type ? String(obj.client_type).slice(0, 32) : null,
+    username: obj.username ? String(obj.username).slice(0, 64) : null,
   };
 }

@@ -10,13 +10,15 @@ export interface Entry {
   delegation_score: number | null;
   hands_off_score: number | null;
   run_length_score: number | null;
+  client_type: string | null;
+  username: string | null;
   created_at: string;
 }
 
 function getSql() {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL not set');
-  return neon(url);
+  return neon(url, { fetchOptions: { cache: 'no-store' } });
 }
 
 async function ensureTable() {
@@ -32,26 +34,13 @@ async function ensureTable() {
       delegation_score NUMERIC(5,2),
       hands_off_score NUMERIC(5,2),
       run_length_score NUMERIC(5,2),
+      client_type TEXT,
+      username TEXT,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
-
-  const countResult = await sql`SELECT COUNT(*)::int as count FROM entries`;
-  const count = countResult[0]?.count ?? 0;
-
-  if (count === 0) {
-    const samples = [
-      { handle: 'fleet-commander', score: 92, profile: 'Fleet Orchestrator' },
-      { handle: 'arch-viz', score: 78, profile: 'Hands-Off Architect' },
-      { handle: 'auto-dev', score: 61, profile: 'Autonomous Operator' },
-      { handle: 'copilot-pro', score: 38, profile: 'Copilot Collaborator' },
-      { handle: 'coder-one', score: 12, profile: 'Hand-Coder' },
-    ];
-    for (const s of samples) {
-      await sql`INSERT INTO entries (handle, score, profile) VALUES (${s.handle}, ${s.score}, ${s.profile})`;
-    }
-  }
-
+  await sql`ALTER TABLE entries ADD COLUMN IF NOT EXISTS client_type TEXT`;
+  await sql`ALTER TABLE entries ADD COLUMN IF NOT EXISTS username TEXT`;
   return sql;
 }
 
@@ -64,6 +53,8 @@ export async function insertEntry(data: {
   delegation_score?: number | null;
   hands_off_score?: number | null;
   run_length_score?: number | null;
+  client_type?: string | null;
+  username?: string | null;
 }): Promise<void> {
   const sql = await ensureTable();
 
@@ -79,6 +70,8 @@ export async function insertEntry(data: {
           delegation_score = ${data.delegation_score ?? null},
           hands_off_score = ${data.hands_off_score ?? null},
           run_length_score = ${data.run_length_score ?? null},
+          client_type = ${data.client_type ?? null},
+          username = ${data.username ?? null},
           created_at = NOW()
         WHERE device_hash = ${data.device_hash}
       `;
@@ -87,7 +80,7 @@ export async function insertEntry(data: {
   }
 
   await sql`
-    INSERT INTO entries (handle, score, profile, device_hash, parallelism_score, delegation_score, hands_off_score, run_length_score)
+    INSERT INTO entries (handle, score, profile, device_hash, parallelism_score, delegation_score, hands_off_score, run_length_score, client_type, username)
     VALUES (
       ${data.handle},
       ${data.score},
@@ -96,7 +89,9 @@ export async function insertEntry(data: {
       ${data.parallelism_score ?? null},
       ${data.delegation_score ?? null},
       ${data.hands_off_score ?? null},
-      ${data.run_length_score ?? null}
+      ${data.run_length_score ?? null},
+      ${data.client_type ?? null},
+      ${data.username ?? null}
     )
   `;
 }
@@ -104,7 +99,7 @@ export async function insertEntry(data: {
 export async function getLeaderboard(): Promise<Entry[]> {
   const sql = await ensureTable();
   const rows = await sql`
-    SELECT id, handle, score, profile, device_hash, parallelism_score, delegation_score, hands_off_score, run_length_score, created_at
+    SELECT id, handle, score, profile, device_hash, parallelism_score, delegation_score, hands_off_score, run_length_score, client_type, username, created_at
     FROM entries
     ORDER BY score DESC, created_at ASC
     LIMIT 100
