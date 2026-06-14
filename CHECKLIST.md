@@ -91,25 +91,25 @@ PROGRESS.md updated every turn. The final state is `verify.sh` printing `VERIFY 
 ## UX + submit-500 fix (Phase 4) — current
 
 ### Critical: submit 500 bug
-- [ ] P4-1: Root cause — `entries_device_hash_key` UNIQUE constraint missing, so `ON CONFLICT (device_hash)` 500s for real CLI submits
-- [ ] P4-2: Create the UNIQUE constraint on the live DB (migration)
-- [ ] P4-3: Enable `experimental.instrumentationHook` so fresh deploys self-migrate (instrumentation.ts was never running)
-- [ ] P4-4: verify.sh test-submit now sends a device_hash (exercises ON CONFLICT path) — catches this class of bug
-- [ ] P4-5: Live curl: submit WITH device_hash returns 200 (was 500)
+- [x] P4-1: Root cause — `entries_device_hash_key` UNIQUE constraint missing, so `ON CONFLICT (device_hash)` 500s for real CLI submits
+- [x] P4-2: Create the UNIQUE constraint on the live DB (migration)
+- [x] P4-3: Enable `experimental.instrumentationHook` so fresh deploys self-migrate (instrumentation.ts was never running)
+- [x] P4-4: verify.sh test-submit now sends a device_hash (exercises ON CONFLICT path) — catches this class of bug
+- [x] P4-5: Live curl: submit WITH device_hash returns 200 (was 500)
 
 ### Data cleanup
-- [ ] P4-6: Delete stale verify-* and dev-abc123 test rows from live DB
-- [ ] P4-7: verify.sh cleans up its own test record so verify-* rows stop accumulating
+- [x] P4-6: Delete stale verify-* and dev-abc123 test rows from live DB
+- [x] P4-7: verify.sh cleans up its own test record so verify-* rows stop accumulating
 
 ### Leaderboard UI
-- [ ] P4-8: Move rankings table ABOVE the "Get your score" box
-- [ ] P4-9: Add a "Submitted" column, CEST-formatted (Europe/Oslo) from created_at
-- [ ] P4-10: Table scrolls (sticky header) once entries exceed ~20 rows
-- [ ] P4-11: New column hidden on mobile alongside Profile/Client
+- [x] P4-8: Move rankings table ABOVE the "Get your score" box
+- [x] P4-9: Add a "Submitted" column, CEST-formatted (Europe/Oslo) from created_at
+- [x] P4-10: Table scrolls (sticky header) once entries exceed ~20 rows
+- [x] P4-11: New column hidden on mobile alongside Profile/Client
 
 ### Agent prompt
-- [ ] P4-12: Copied prompt instructs the agent to run scan first, show the score, and ASK the user before submitting (no silent auto-upload)
+- [x] P4-12: Copied prompt instructs the agent to run scan first, show the score, and ASK the user before submitting (no silent auto-upload)
 
 ### Ship Phase 4
-- [ ] P4-13: Built, tests pass, npm published, committed, pushed, deployed, re-aliased
-- [ ] P4-14: `bash verify.sh` prints `VERIFY OK` and live curls confirm 200-with-device_hash
+- [x] P4-13: Built, tests pass, npm published, committed, pushed, deployed, re-aliased
+- [x] P4-14: `bash verify.sh` prints `VERIFY OK` and live curls confirm 200-with-device_hash
