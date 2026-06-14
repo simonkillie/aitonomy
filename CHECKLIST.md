@@ -50,39 +50,39 @@ PROGRESS.md updated every turn. The final state is `verify.sh` printing `VERIFY 
 ## Quality & Hardening (Phase 3) — current
 
 ### Critical: Correctness & Security
-- [ ] C1: `submit.ts` — return `{ok:false}` on non-2xx instead of throwing (prevents ugly crash on submit failure)
-- [ ] C2: `db.ts` — replace SELECT+UPDATE/INSERT race with `INSERT ... ON CONFLICT (device_hash) DO UPDATE`; add UNIQUE constraint
-- [ ] C3: `db.ts` — remove DDL (`ensureTable`) from request hot path; run migration once at startup/deploy
-- [ ] C4: `leaderboard/route.ts` — omit `device_hash` from `getLeaderboard()` SELECT and API response
+- [x] C1: `submit.ts` — return `{ok:false}` on non-2xx instead of throwing (prevents ugly crash on submit failure)
+- [x] C2: `db.ts` — replace SELECT+UPDATE/INSERT race with `INSERT ... ON CONFLICT (device_hash) DO UPDATE`; add UNIQUE constraint
+- [x] C3: `db.ts` — remove DDL (`ensureTable`) from request hot path; run migration once at startup/deploy
+- [x] C4: `leaderboard/route.ts` — omit `device_hash` from `getLeaderboard()` SELECT and API response
 
 ### Security: Input Validation
-- [ ] M2: `validation.ts` — sanitize `handle` against Unicode control characters and directional overrides
-- [ ] M3: `validation.ts` — validate `profile` against the known 5-value enum (reject unknown profiles with 400)
-- [ ] M7: `submit.ts` — add `AbortSignal.timeout(10_000)` to the fetch call (no-timeout = CLI hangs forever)
+- [x] M2: `validation.ts` — sanitize `handle` against Unicode control characters and directional overrides
+- [x] M3: `validation.ts` — validate `profile` against the known 5-value enum (reject unknown profiles with 400)
+- [x] M7: `submit.ts` — add `AbortSignal.timeout(10_000)` to the fetch call (no-timeout = CLI hangs forever)
 
 ### CLI UX: Critical paths
-- [ ] CLI-5.1: Zero sessions shows a no-data message (`No sessions found — try --days 30`), not a fake `0.0/100` score
-- [ ] CLI-5.3: Fix `"1 sessions"` → `"1 session"` grammar
-- [ ] CLI-4.1: Error handler gives cause-specific hints (file permissions, parse errors, network failures)
+- [x] CLI-5.1: Zero sessions shows a no-data message (`No sessions found — try --days 30`), not a fake `0.0/100` score
+- [x] CLI-5.3: Fix `"1 sessions"` → `"1 session"` grammar
+- [x] CLI-4.1: Error handler gives cause-specific hints (file permissions, parse errors, network failures)
 
 ### CLI UX: Score explanation
-- [ ] CLI-1.1: Axis labels in breakdown include short inline gloss (e.g. `Parallelism (concurrent sessions)`)
-- [ ] CLI-2.1: Add `(weight = share of composite score)` note under Breakdown heading
-- [ ] CLI-2.2: Balanced-score insight names the weakest axis and gives its specific tip, not a generic message
-- [ ] CLI-2.3: Profile line shows score range, e.g. `Autonomous Operator  45–69`
-- [ ] CLI-7.4: When Codex sessions present, note that subagent detection is unsupported (delegation may be underreported)
+- [x] CLI-1.1: Axis labels in breakdown include short inline gloss (e.g. `Parallelism (concurrent sessions)`)
+- [x] CLI-2.1: Add `(weight = share of composite score)` note under Breakdown heading
+- [x] CLI-2.2: Balanced-score insight names the weakest axis and gives its specific tip, not a generic message
+- [x] CLI-2.3: Profile line shows score range, e.g. `Autonomous Operator  45–69`
+- [x] CLI-7.4: When Codex sessions present, note that subagent detection is unsupported (delegation may be underreported)
 
 ### Metrics: Accuracy
-- [ ] M4: Fix `normalizeRunLength` comment (says 90 min; formula saturates at 150 min)
-- [ ] M5: `toolsPerTurn` fallback when no human turns should be capped, not equal to raw tool count
-- [ ] L3: Remove dead export `getProfileDescription` from `profiles.ts`
+- [x] M4: Fix `normalizeRunLength` comment (says 90 min; formula saturates at 150 min)
+- [x] M5: `toolsPerTurn` fallback when no human turns should be capped, not equal to raw tool count
+- [x] L3: Remove dead export `getProfileDescription` from `profiles.ts`
 
 ### Web UX: First impression
-- [ ] Web-CTA: Agent box visually distinct — higher contrast border/background vs page
-- [ ] Web-CTA: Add stepped instructions (1. Copy → 2. Paste into agent → 3. See score)
-- [ ] Web-CTA: Move privacy note and "how it works" into the CTA box, not just footer
-- [ ] Web-Mobile: Add CSS media query to hide Profile/Client columns and adjust layout at <600px
-- [ ] Web-Trust: Add "source code on GitHub" link near the copy prompt
+- [x] Web-CTA: Agent box visually distinct — higher contrast border/background vs page
+- [x] Web-CTA: Add stepped instructions (1. Copy → 2. Paste into agent → 3. See score)
+- [x] Web-CTA: Move privacy note and "how it works" into the CTA box, not just footer
+- [x] Web-Mobile: Add CSS media query to hide Profile/Client columns and adjust layout at <600px
+- [x] Web-Trust: Add "source code on GitHub" link near the copy prompt
 
 ### Ship Phase 3
 - [x] All fixes committed, pushed, npm published, Vercel redeployed, alias re-pointed
