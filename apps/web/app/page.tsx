@@ -96,12 +96,9 @@ export default async function Home() {
         .when { font-size: 11px; color: #4b5563; font-variant-numeric: tabular-nums; white-space: nowrap; }
         .empty { text-align: center; padding: 48px 12px; color: #374151; font-size: 13px; }
         .agent-box { margin-bottom: 48px; border: 1px solid #2a2a2a; border-left: 3px solid #4b5563; border-radius: 8px; padding: 20px 24px; background: #111; }
-        .agent-box-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #6b7280; margin-bottom: 12px; }
-        .steps { list-style: none; margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
-        .steps li { font-size: 13px; color: #6b7280; display: flex; gap: 10px; line-height: 1.5; }
-        .steps li .step-num { color: #4b5563; font-variant-numeric: tabular-nums; min-width: 16px; flex-shrink: 0; }
-        .steps li .step-text { color: #9ca3af; }
-        .steps li .step-text strong { color: #d1d5db; font-weight: 500; }
+        .agent-box-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+        .agent-box-lead { font-size: 13px; color: #9ca3af; margin-bottom: 14px; line-height: 1.5; }
+        .agent-box-lead strong { color: #d1d5db; font-weight: 500; }
         .privacy-note { font-size: 11px; color: #374151; margin-top: 12px; line-height: 1.6; }
         .privacy-note a { color: #4b5563; text-decoration: underline; text-underline-offset: 2px; }
         .privacy-note a:hover { color: #6b7280; }
@@ -200,11 +197,7 @@ export default async function Home() {
 
         <div className="agent-box">
           <div className="agent-box-title">Get your score</div>
-          <ol className="steps">
-            <li><span className="step-num">1.</span><span className="step-text">Copy the prompt below</span></li>
-            <li><span className="step-num">2.</span><span className="step-text">Paste it into <strong>Claude Code or Codex</strong> as a message to your agent</span></li>
-            <li><span className="step-num">3.</span><span className="step-text">Your score appears in your terminal — your agent will <strong>ask before</strong> publishing anything</span></li>
-          </ol>
+          <p className="agent-box-lead">Paste this into your agent to get your score — it will <strong>ask before</strong> uploading anything.</p>
           <CopyPrompt />
           <p className="privacy-note">
             Reads only event types, timestamps, and tool-call counts from <code style={{fontSize:'10px',color:'#4b5563'}}>~/.claude/</code> and <code style={{fontSize:'10px',color:'#4b5563'}}>~/.codex/</code> — no prompt text, code, or file paths ever leave your machine.{' '}
